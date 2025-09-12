@@ -1,0 +1,39 @@
+name: Go Vulnerability Check
+permissions:
+  contents: read
+  
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '27 12 * * 0' # Runs weekly on Sundays at 12:27 UTC
+
+jobs:
+  govulncheck:
+    runs-on: [self-hosted, Linux, X64, WebBeds, kubernetes, cicd]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Checkout GitHub Action Repo
+        uses: actions/checkout@v5
+        with:
+          repository: WebBeds/webbeds-actions
+          token: ${ secrets.WEBBEDS_GIT_TOKEN }
+          path: ./webbeds-actions
+          ref: PE-4481_optimize_ci_build
+
+      - name: Install Go
+        uses: ./webbeds-actions/build-go/
+        with:
+          app_name: ssoid
+          go-version-file: "go.mod"
+          test: false
+          cache: true
+          build_linux_amd64: false
+          build_linux_arm64: false
+          github_token: ${ secrets.WEBBEDS_GIT_TOKEN }
+
+      - name: govulncheck
+        shell: bash
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck -test ./...
