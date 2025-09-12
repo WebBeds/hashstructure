@@ -1,0 +1,17 @@
+name: CodeQL Advanced
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 19 * * 0'
+jobs:
+
+  golang:
+    uses: WebBeds/webbeds-reusable-workflows/.github/workflows/scan_go.yml@main
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    secrets:
+      GIT_TOKEN: ${{ secrets.WEBBEDS_GIT_TOKEN }}
+
